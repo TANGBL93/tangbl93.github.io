@@ -524,7 +524,7 @@ gitment:
   cleanly: false # Hide 'Powered by ...' on footer, and more
   language: # Force language, or auto switch by theme
   github_user: tangbl93 # MUST HAVE, Your Github Username
-  github_repo: tangbl93.github.io.git # MUST HAVE, The name of the repo you use to store Gitment comments
+  github_repo: tangbl93.github.io # MUST HAVE, The name of the repo you use to store Gitment comments
   client_id: 0deae65a32e3aed5ee38 # MUST HAVE, Github client id for the Gitment
   client_secret: 5c376910db69da0fb8fa10ae3168d5839a17010a # EITHER this or proxy_gateway, Github access secret token for the Gitment
   proxy_gateway: # Address of api proxy, See: https://github.com/aimingoo/intersect
