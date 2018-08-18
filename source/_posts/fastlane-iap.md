@@ -102,3 +102,11 @@ end
 
 puts "-------创建内购项目结束-------"
 ```
+
+## 参考文档
+
+- https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/tunes/iap.rb
+- https://andreygordeev.com/2017/09/14/create-iap-records-programmatically/
+- https://github.com/fastlane/fastlane/pull/7834
+- https://github.com/fastlane/fastlane/issues/8348
+- https://github.com/fastlane/fastlane/issues/1631
