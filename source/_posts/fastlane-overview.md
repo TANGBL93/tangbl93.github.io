@@ -16,6 +16,7 @@ tags:
 - [基于fastlane的实践-管理证书](../fastlane-match/)
 - [基于fastlane的实践-添加测试机](../fastlane-tjcsj/)
 - [基于fastlane的实践-新建内购项目](../fastlane-iap/)
+- [基于fastlane的实践-通过Archive生成IPA](/2018/12/02/fastlane-archive/)
 
 ## 背景
 
@@ -42,7 +43,9 @@ tags:
 
 ## 期望做的
 
-### 基于 `AdHoc` 打包的文件，自动生成 `AppStore` 的 `ipa`
+### <del>基于 `AdHoc` 打包的文件，自动生成 `AppStore` 的 `ipa`</del>
+
+> 已实现:[基于fastlane的实践-通过Archive生成IPA](/2018/12/02/fastlane-archive/)
 
 这一步其实是由于现在上传 `App Store` 就是基于 `Xcode` 来做的，可以省去重复打包，而且确保代码和测试过的一致。
 
