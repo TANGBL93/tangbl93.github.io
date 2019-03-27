@@ -79,5 +79,5 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:tangbl93/tangbl93.github.io.git
+  repo: https://gh_token@github.com/tangbl93/tangbl93.github.io.git
   branch: master
