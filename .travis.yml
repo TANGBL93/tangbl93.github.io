@@ -1,5 +1,6 @@
 language: node_js
 node_js: --lts
+github_token: $GITHUB_TOKEN
 before_script:
   - npm install
 script:
