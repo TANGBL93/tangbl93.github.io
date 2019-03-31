@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="mask-icon" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="内购丢单问题解决方案 截止到今天为止,该方案已在线上运行大概4个月左右，目前没有收到用户反馈有丢单问题。  之前的处理流程 其实之前我在网上查询怎么做内购的时候，发现大部分文章都是介绍的这种方法。   通过服务器创建一个订单，并获取到 trade_no(订单号)，(total_fee订单金额)等数据 请求内购产品信息，并将 trade_no,total_fee等 绑定到 transaction.p">
+<meta name="keywords" content="IAP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内购丢单问题解决方案">
+<meta property="og:url" content="https://tangbl93.github.io/2018/12/02/iap-issues/index.html">
+<meta property="og:site_name" content="汤~">
+<meta property="og:description" content="内购丢单问题解决方案 截止到今天为止,该方案已在线上运行大概4个月左右，目前没有收到用户反馈有丢单问题。  之前的处理流程 其实之前我在网上查询怎么做内购的时候，发现大部分文章都是介绍的这种方法。   通过服务器创建一个订单，并获取到 trade_no(订单号)，(total_fee订单金额)等数据 请求内购产品信息，并将 trade_no,total_fee等 绑定到 transaction.p">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-31T00:42:55.155Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="内购丢单问题解决方案">
+<meta name="twitter:description" content="内购丢单问题解决方案 截止到今天为止,该方案已在线上运行大概4个月左右，目前没有收到用户反馈有丢单问题。  之前的处理流程 其实之前我在网上查询怎么做内购的时候，发现大部分文章都是介绍的这种方法。   通过服务器创建一个订单，并获取到 trade_no(订单号)，(total_fee订单金额)等数据 请求内购产品信息，并将 trade_no,total_fee等 绑定到 transaction.p">
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="汤~" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://tangbl93.github.io/2018/12/02/iap-issues/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>内购丢单问题解决方案 | 汤~</title>
+  
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=96340554-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '96340554-1');
+</script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">汤~</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangbl93.github.io/2018/12/02/iap-issues/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="汤~">
+      <meta itemprop="description" content="有时候读书是一种巧妙地避开思考的方法">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/13956214">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="汤~">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">内购丢单问题解决方案
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-02 08:21:32" itemprop="dateCreated datePublished" datetime="2018-12-02T08:21:32+00:00">2018-12-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-31 00:42:55" itemprop="dateModified" datetime="2019-03-31T00:42:55+00:00">2019-03-31</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/12/02/iap-issues/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/12/02/iap-issues/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="内购丢单问题解决方案"><a href="#内购丢单问题解决方案" class="headerlink" title="内购丢单问题解决方案"></a>内购丢单问题解决方案</h1><blockquote>
+<p>截止到今天为止,该方案已在线上运行大概4个月左右，目前没有收到用户反馈有丢单问题。</p>
+</blockquote>
+<h2 id="之前的处理流程"><a href="#之前的处理流程" class="headerlink" title="之前的处理流程"></a>之前的处理流程</h2><blockquote>
+<p>其实之前我在网上查询怎么做内购的时候，发现大部分文章都是介绍的这种方法。</p>
+</blockquote>
+<ol>
+<li>通过服务器创建一个订单，并获取到 trade_no(订单号)，(total_fee订单金额)等数据</li>
+<li>请求内购产品信息，并将 trade_no,total_fee等 绑定到 transaction.payment.applicationUsername 上</li>
+<li>发起内购支付请求，并监听到内购支付的状态变化</li>
+<li>在支付成功状态后将 receipt 缓存起来，并执行 finishTransaction 操作</li>
+<li>将 receipt 等数据传给服务器做支付校验，服务器通过请求苹果后台做校验判断是否真实的支付</li>
+<li>在服务器校验成功后，将本地缓存清除</li>
+<li>如果有丢单情况，会在启动时从缓存中读取 receipt 去执行第4步</li>
+</ol>
+<p>实际上，这套方案看似没什么问题。但是还是频繁收到用户反馈说有丢单，然后就有了之后的优化。</p>
+<p>从我个人的经验来分析，主要有以下可能性:</p>
+<ol>
+<li>后台内购支付处理未做足够的校验(划重点)</li>
+<li>缓存未维护好，容易被利用刷钱或者是其他BUG(在这个优化需求出来之前，我司APP疑似被利用该BUG刷了几万块的内购币)</li>
+<li>支付中断，比如: 请求支付后退出APP，然后支付成功。等等其他类似的情况</li>
+<li>其他原因,等等…</li>
+</ol>
+<h2 id="优化之后的流程"><a href="#优化之后的流程" class="headerlink" title="优化之后的流程"></a>优化之后的流程</h2><ol>
+<li>同上</li>
+<li>同上</li>
+<li>同上</li>
+<li>直接获取 receipt 、trade_no、 transaction_id 值去向服务器校验</li>
+<li>在服务器校验成功后，执行 finishTransaction 操作</li>
+<li>如果有丢单，或者无法访问服务器导致校验失败,在下次启动时，会重新走进来状态变化的代理方法</li>
+<li>如果服务器校验该收据不合法，也执行 finishTransaction 操作，并提示用户</li>
+</ol>
+<p>这就是最终优化后的逻辑，这种方法可以保证用户成功支付之后，必然会在服务器校验后结束。</p>
+<h2 id="优化之后的问题"><a href="#优化之后的问题" class="headerlink" title="优化之后的问题"></a>优化之后的问题</h2><p>其实，在优化后，还是有问题的，transaction.payment.applicationUsername 经常获取不到。也就没办法在极端情况下获取到 trade_no 、total_fee 这些参数了。</p>
+<p>所幸，还有个迂回的解决方案。在苹果服务器校验收据之后，会返回一个 JSON 数据，内容大致如下:</p>
+<ul>
+<li>environment、environment: 内购环境</li>
+<li>bundle_id、application_version: APP包名、版本</li>
+<li>in_app: 支付成功返回的数据，未支付成功也会返回JSON，但一定没有这个参数。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;status&quot;: 0,</span><br><span class="line">  &quot;environment&quot;: &quot;Production&quot;,</span><br><span class="line">  &quot;receipt&quot;: &#123;</span><br><span class="line">    &quot;receipt_type&quot;: &quot;Production&quot;,</span><br><span class="line">    &quot;adam_id&quot;: ...,</span><br><span class="line">    &quot;app_item_id&quot;: ...,</span><br><span class="line">    &quot;bundle_id&quot;: &quot;&quot;,</span><br><span class="line">    &quot;application_version&quot;: &quot;&quot;,</span><br><span class="line">    &quot;download_id&quot;: ...,</span><br><span class="line">    &quot;version_external_identifier&quot;: ...,</span><br><span class="line">    &quot;receipt_creation_date&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;receipt_creation_date_ms&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;receipt_creation_date_pst&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;request_date&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;request_date_ms&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;request_date_pst&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;original_purchase_date&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;original_purchase_date_ms&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;original_purchase_date_pst&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;original_application_version&quot;: &quot;...&quot;,</span><br><span class="line">    &quot;in_app&quot;: [&#123;</span><br><span class="line">      &quot;quantity&quot;: &quot;1&quot;,</span><br><span class="line">      &quot;product_id&quot;: &quot;&lt;#product_id#&gt;&quot;,</span><br><span class="line">      &quot;transaction_id&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;original_transaction_id&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;purchase_date&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;purchase_date_ms&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;purchase_date_pst&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;original_purchase_date&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;original_purchase_date_ms&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;original_purchase_date_pst&quot;: &quot;...&quot;,</span><br><span class="line">      &quot;is_trial_period&quot;: &quot;false&quot;</span><br><span class="line">    &#125;]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在后台去拿到这个JSON之后，需要做以下处理:</p>
+<ol>
+<li>首先就要去校验<code>内购环境</code>, 我司方案是先校验不是 <code>&quot;Production&quot;</code> 的话就报错。仅允许内部用户使用沙箱模式(切记:沙箱模式内购不要钱)</li>
+<li>然后就校验有木有 <code>in_app</code> 参数，有的话就是正常支付，直接往下走。否则就是异常支付，当错误处理，并返回异常信息。</li>
+<li>校验通过后，查看时候有收到 <code>trade_no</code>、<code>total_fee</code> 参数，有就完事大吉，正常处理支付成功逻辑就OK。</li>
+<li>如果没有这俩参数，就从 <code>quantity</code>(价格等级) 或者 <code>product_id</code>(内购商品ID) 去生成 <code>total_fee</code></li>
+<li>生成 <code>total_fee</code> 之后，<code>trade_no</code> 就可以根据 <code>total_fee</code>、<code>original_purchase_date</code> 以及后台该用户未支付的订单中去匹配最合适的当成支付成功</li>
+</ol>
+<p>然后就这样，这套方案就基本没什么问题了。主要就是在后台这块儿需要多处理些漏参数的问题，其他都还好。有丢单现象的同学可以试一试这种方法。</p>
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p>如果你刚开始做内购，对于其中很多东西还不太明白，推荐你看一看贝聊科技的 NewPan 写的这几篇博客。</p>
+<ul>
+<li><a href="https://juejin.im/post/5a3b14f36fb9a045104aa6c8" target="_blank" rel="noopener">[贝聊科技]贝聊 IAP 实战之满地是坑</a></li>
+<li><a href="https://juejin.im/post/5a3b164e6fb9a0450e76466b" target="_blank" rel="noopener">[贝聊科技]贝聊 IAP 实战之见坑填坑</a></li>
+<li><a href="https://juejin.im/post/5a3b169151882521033469b4" target="_blank" rel="noopener">[贝聊科技]贝聊 IAP 实战之订单绑定</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IAP/" rel="tag"># IAP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/02/fastlane-archive/" rel="next" title="基于fastlane的实践-通过Archive生成IPA">
+                <i class="fa fa-chevron-left"></i> 基于fastlane的实践-通过Archive生成IPA
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/13956214"
+                alt="汤~" />
+            
+              <p class="site-author-name" itemprop="name">汤~</p>
+              <p class="site-description motion-element" itemprop="description">有时候读书是一种巧妙地避开思考的方法</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/tangbl93/tangbl93.github.io/issues" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#内购丢单问题解决方案"><span class="nav-number">1.</span> <span class="nav-text">内购丢单问题解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#之前的处理流程"><span class="nav-number">1.1.</span> <span class="nav-text">之前的处理流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化之后的流程"><span class="nav-number">1.2.</span> <span class="nav-text">优化之后的流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化之后的问题"><span class="nav-number">1.3.</span> <span class="nav-text">优化之后的问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#推荐阅读"><span class="nav-number">2.</span> <span class="nav-text">推荐阅读</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汤~</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'tangbl93',
+            repo: 'tangbl93.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '5c376910db69da0fb8fa10ae3168d5839a17010a',
+            
+                client_id: '0deae65a32e3aed5ee38'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="mask-icon" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="上篇先说一下打包的周边问题(也可以先跳过)，下篇再聚焦于打包本身。  配置机器由于是在其他机器上打包，所以需要:  将自己电脑和打包机器在同一个局域网下(或者说同一个WIFI) 在 系统偏好设置 -&amp;gt; 共享 中打开远程登录、屏幕共享、文件共享三个权限 将马甲包重新命名放在用户目录下，方便单独打包 配置好一份别名，方便直接打包  然后平时打包就是通过 访达-&amp;gt;共享屏幕 去访问，或者说">
+<meta name="keywords" content="fastlane">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于fastlane的实践-自动化打包(上)">
+<meta property="og:url" content="https://tangbl93.github.io/2018/08/18/fastlane-gym-01/index.html">
+<meta property="og:site_name" content="汤~">
+<meta property="og:description" content="上篇先说一下打包的周边问题(也可以先跳过)，下篇再聚焦于打包本身。  配置机器由于是在其他机器上打包，所以需要:  将自己电脑和打包机器在同一个局域网下(或者说同一个WIFI) 在 系统偏好设置 -&amp;gt; 共享 中打开远程登录、屏幕共享、文件共享三个权限 将马甲包重新命名放在用户目录下，方便单独打包 配置好一份别名，方便直接打包  然后平时打包就是通过 访达-&amp;gt;共享屏幕 去访问，或者说">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangbl93.github.io/images/keychain_access.png">
+<meta property="og:updated_time" content="2019-03-31T00:42:55.155Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于fastlane的实践-自动化打包(上)">
+<meta name="twitter:description" content="上篇先说一下打包的周边问题(也可以先跳过)，下篇再聚焦于打包本身。  配置机器由于是在其他机器上打包，所以需要:  将自己电脑和打包机器在同一个局域网下(或者说同一个WIFI) 在 系统偏好设置 -&amp;gt; 共享 中打开远程登录、屏幕共享、文件共享三个权限 将马甲包重新命名放在用户目录下，方便单独打包 配置好一份别名，方便直接打包  然后平时打包就是通过 访达-&amp;gt;共享屏幕 去访问，或者说">
+<meta name="twitter:image" content="https://tangbl93.github.io/images/keychain_access.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="汤~" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://tangbl93.github.io/2018/08/18/fastlane-gym-01/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>基于fastlane的实践-自动化打包(上) | 汤~</title>
+  
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=96340554-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '96340554-1');
+</script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">汤~</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangbl93.github.io/2018/08/18/fastlane-gym-01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="汤~">
+      <meta itemprop="description" content="有时候读书是一种巧妙地避开思考的方法">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/13956214">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="汤~">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于fastlane的实践-自动化打包(上)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-18 08:55:11" itemprop="dateCreated datePublished" datetime="2018-08-18T08:55:11+00:00">2018-08-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-31 00:42:55" itemprop="dateModified" datetime="2019-03-31T00:42:55+00:00">2019-03-31</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/18/fastlane-gym-01/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/08/18/fastlane-gym-01/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>上篇先说一下打包的周边问题(也可以先跳过)，下篇再聚焦于打包本身。</p>
+</blockquote>
+<h1 id="配置机器"><a href="#配置机器" class="headerlink" title="配置机器"></a>配置机器</h1><p>由于是在其他机器上打包，所以需要:</p>
+<ol>
+<li>将自己电脑和打包机器在同一个局域网下(或者说同一个WIFI)</li>
+<li>在 <code>系统偏好设置</code> -&gt; <code>共享</code> 中打开远程登录、屏幕共享、文件共享三个权限</li>
+<li>将马甲包重新命名放在用户目录下，方便单独打包</li>
+<li>配置好一份别名，方便直接打包</li>
+</ol>
+<p>然后平时打包就是通过 <code>访达-&gt;共享屏幕</code> 去访问，或者说 <code>ssh(远程登录)</code> 链接上去。如果需要远程在家的话，可以考虑挂一个 <code>TeamViewer</code></p>
+<h1 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h1><h2 id="无法读取钥匙串"><a href="#无法读取钥匙串" class="headerlink" title="无法读取钥匙串"></a>无法读取钥匙串</h2><p>如果是通过 <code>ssh方式</code> 远程登录到其他macOS机器上，直接打包可能由于 <code>Keychain</code> 未解锁的问题导致打包失败。</p>
+<p>解决办法是在远程机器桌面创建一个登录密码文件,假如当前登录密码为 <code>12345678</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 也可以手动创建一份文件，注意文件名需要和后边的匹配</span><br><span class="line">echo 12345678 &gt; ~/.keychain_pass_file</span><br></pre></td></tr></table></figure>
+<p>然后在脚本最前面，加上:</p>
+<blockquote>
+<p>注意:脚本第一行会打印密码出来。如果对这有顾虑的可以研究换一种方法</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 解锁远程机器上的钥匙串</span><br><span class="line">keychain_pass = sh(&quot;cat ~/.keychain_pass_file&quot;)</span><br><span class="line">sh &quot;security unlock-keychain -p #&#123;keychain_pass&#125;&quot;</span><br><span class="line">unlock_keychain(path: &quot;~/Library/Keychains/login.keychain&quot;, password: &quot;$(cat ~/.keychain_pass_file)&quot;)</span><br></pre></td></tr></table></figure>
+<h2 id="Fastfile共用"><a href="#Fastfile共用" class="headerlink" title="Fastfile共用"></a>Fastfile共用</h2><p>由于有多个马甲包，且可能由不同人负责的，且打包脚本也有可能更新，如何让他们共用同一份Fastfile呢。</p>
+<p>稍微查了下资料后，发现有一个 <a href="https://docs.fastlane.tools/advanced/#environment-variables" target="_blank" rel="noopener"><code>环境变量(env)</code></a> 和 <code>远程文件</code> ，完全满足这个需求。</p>
+<p>环境变量:</p>
+<pre><code>- 类似于 `xcconfig`,配置键值对，然后在 `Fastfile` 中通过 `ENV[&quot;Key&quot;]`来获取不同值
+- 在打包时，执行 `fastlane fir --env weixin` , 其中 `weixin` 必须和 `env` 文件名一致，如: `.env.weixin`
+</code></pre><p>远程文件: 可以导入远程文件，来实现始终为最新版本的打包脚本</p>
+<h2 id="打包在签名时询问密码"><a href="#打包在签名时询问密码" class="headerlink" title="打包在签名时询问密码"></a>打包在签名时询问密码</h2><p>初次打包时，可能会询问密码,这个时候，可以用这一行命令来解决</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">security set-key-partition-list -S apple-tool:,apple: -k &quot;$(cat ~/.keychain_pass_file)&quot; ~/Library/Keychains/login.keychain</span><br></pre></td></tr></table></figure>
+<p>也可以到钥匙串里，设置证书的访问控制权限来达到目的。</p>
+<p><img src="/images/keychain_access.png" alt="keychain_access.png"></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/fastlane/" rel="tag"># fastlane</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/18/fastlane-overview/" rel="next" title="基于fastlane的实践-大纲">
+                <i class="fa fa-chevron-left"></i> 基于fastlane的实践-大纲
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/18/fastlane-gym-02/" rel="prev" title="基于fastlane的实践-自动化打包(下)">
+                基于fastlane的实践-自动化打包(下) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/13956214"
+                alt="汤~" />
+            
+              <p class="site-author-name" itemprop="name">汤~</p>
+              <p class="site-description motion-element" itemprop="description">有时候读书是一种巧妙地避开思考的方法</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/tangbl93/tangbl93.github.io/issues" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#配置机器"><span class="nav-number">1.</span> <span class="nav-text">配置机器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#遇到的问题"><span class="nav-number">2.</span> <span class="nav-text">遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#无法读取钥匙串"><span class="nav-number">2.1.</span> <span class="nav-text">无法读取钥匙串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fastfile共用"><span class="nav-number">2.2.</span> <span class="nav-text">Fastfile共用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#打包在签名时询问密码"><span class="nav-number">2.3.</span> <span class="nav-text">打包在签名时询问密码</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汤~</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'tangbl93',
+            repo: 'tangbl93.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '5c376910db69da0fb8fa10ae3168d5839a17010a',
+            
+                client_id: '0deae65a32e3aed5ee38'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

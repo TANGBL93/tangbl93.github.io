@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="mask-icon" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="上篇说了一些问题，这篇文章就来看一下怎么打包过程。这里就按照步骤来说一下。 需求按照我们APP现有的需求，先列举一下:  打包的版本号(版本号，编译版本号)必须为偶数(便于优先追踪线上、内测版BUG) 推送到 fir.im，且成功后发送一条消息到钉钉 打包结束自动修改版本号、打标签并推送 由于可能会发测试版给外部用户安装，所以需要发送特定版本号给用户 需要支持打混淆分支，并将版本号同步非混淆分支">
+<meta name="keywords" content="fastlane">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于fastlane的实践-自动化打包(下)">
+<meta property="og:url" content="https://tangbl93.github.io/2018/08/18/fastlane-gym-02/index.html">
+<meta property="og:site_name" content="汤~">
+<meta property="og:description" content="上篇说了一些问题，这篇文章就来看一下怎么打包过程。这里就按照步骤来说一下。 需求按照我们APP现有的需求，先列举一下:  打包的版本号(版本号，编译版本号)必须为偶数(便于优先追踪线上、内测版BUG) 推送到 fir.im，且成功后发送一条消息到钉钉 打包结束自动修改版本号、打标签并推送 由于可能会发测试版给外部用户安装，所以需要发送特定版本号给用户 需要支持打混淆分支，并将版本号同步非混淆分支">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-31T00:42:55.155Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于fastlane的实践-自动化打包(下)">
+<meta name="twitter:description" content="上篇说了一些问题，这篇文章就来看一下怎么打包过程。这里就按照步骤来说一下。 需求按照我们APP现有的需求，先列举一下:  打包的版本号(版本号，编译版本号)必须为偶数(便于优先追踪线上、内测版BUG) 推送到 fir.im，且成功后发送一条消息到钉钉 打包结束自动修改版本号、打标签并推送 由于可能会发测试版给外部用户安装，所以需要发送特定版本号给用户 需要支持打混淆分支，并将版本号同步非混淆分支">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="汤~" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://tangbl93.github.io/2018/08/18/fastlane-gym-02/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>基于fastlane的实践-自动化打包(下) | 汤~</title>
+  
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=96340554-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '96340554-1');
+</script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">汤~</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangbl93.github.io/2018/08/18/fastlane-gym-02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="汤~">
+      <meta itemprop="description" content="有时候读书是一种巧妙地避开思考的方法">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/13956214">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="汤~">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于fastlane的实践-自动化打包(下)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-18 08:56:31" itemprop="dateCreated datePublished" datetime="2018-08-18T08:56:31+00:00">2018-08-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-31 00:42:55" itemprop="dateModified" datetime="2019-03-31T00:42:55+00:00">2019-03-31</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/18/fastlane-gym-02/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/08/18/fastlane-gym-02/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上篇说了一些问题，这篇文章就来看一下怎么打包过程。这里就按照步骤来说一下。</p>
+<h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>按照我们APP现有的需求，先列举一下:</p>
+<ol>
+<li>打包的版本号(版本号，编译版本号)必须为偶数(便于优先追踪线上、内测版BUG)</li>
+<li>推送到 <code>fir.im</code>，且成功后发送一条消息到钉钉</li>
+<li>打包结束自动修改版本号、打标签并推送</li>
+<li>由于可能会发测试版给外部用户安装，所以需要发送特定版本号给用户</li>
+<li>需要支持打混淆分支，并将版本号同步非混淆分支</li>
+</ol>
+<h1 id="非混淆分支"><a href="#非混淆分支" class="headerlink" title="非混淆分支"></a>非混淆分支</h1><p>首先，按照常规步骤先走一遍，来看看是如何做的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">desc &quot;打测试包专用&quot;</span><br><span class="line">  lane :fir do</span><br><span class="line">    ...接下来这个步骤的所有命令全部在这里...</span><br><span class="line">  end</span><br></pre></td></tr></table></figure>
+<h2 id="1-解锁远程机器钥匙串"><a href="#1-解锁远程机器钥匙串" class="headerlink" title="1. 解锁远程机器钥匙串"></a>1. 解锁远程机器钥匙串</h2><p>因为我个人本身还是习惯直接通过 <code>ssh</code> 的，所以按照上一篇的加上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># unlock_keychain</span><br><span class="line">keychain_pass = sh(&quot;cat ~/.keychain_pass_file&quot;)</span><br><span class="line">sh &quot;security unlock-keychain -p #&#123;keychain_pass&#125;&quot;</span><br><span class="line">unlock_keychain(path: &quot;~/Library/Keychains/login.keychain&quot;, password: &quot;$(cat ~/.keychain_pass_file)&quot;)</span><br></pre></td></tr></table></figure>
+<h2 id="2-拉取最新代码，重置本地修改"><a href="#2-拉取最新代码，重置本地修改" class="headerlink" title="2. 拉取最新代码，重置本地修改"></a>2. 拉取最新代码，重置本地修改</h2><p>毕竟我们打包肯定要用最新代码的吧，所以这一步做了一些事，且保证不会和我们上传的有区别:</p>
+<ul>
+<li>获取到当前的分支名: 有几次发现某些马甲包无法自动识别分支，导致需要手动操作，其中 <code>gsub</code> 表示去除空行、换行符等</li>
+<li>然后首先重置一次，再拉取服务器最新代码，其中 <code>--no-edit</code> 表示自动合并，否则可能拉取之后需要手动输入合并信息</li>
+<li>最后执行 <code>pod update</code> 并再次重置,主要是有时候更新会导致工程文件变化。使用 <code>--no-repo-update</code> 纯粹是因为网络不好</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># git branch</span><br><span class="line">branch_name = sh(&quot;git rev-parse --symbolic-full-name --abbrev-ref HEAD&quot;).gsub(/\s+/, &quot;&quot;)</span><br><span class="line"></span><br><span class="line"># git pull</span><br><span class="line">sh &quot;git reset --hard&quot;</span><br><span class="line">sh &quot;git pull origin #&#123;branch_name&#125; --no-edit&quot;</span><br><span class="line"></span><br><span class="line"># pod update</span><br><span class="line">sh &quot;pod update --no-repo-update&quot;</span><br><span class="line">sh &quot;git reset --hard&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="3-修改版本号"><a href="#3-修改版本号" class="headerlink" title="3. 修改版本号"></a>3. 修改版本号</h2><p>这里有点坑，<code>fastlane</code> 自带的那个 <code>increment_build_number</code> 有点坑，没办法使用。所以只能就手动读取、设置</p>
+<ul>
+<li>这里做了个兼容，也就是当版本号为x.x.0，或者当前已经为偶数时，会做不同的处理，其他时候为正常+1</li>
+<li>#{ENV[“PLISTPATH”]} 表示读取环境变量中 <code>PLISTPATH</code> 的值</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># set version</span><br><span class="line">prev_apk_version = get_info_plist_value(path: &quot;#&#123;ENV[&quot;PLISTPATH&quot;]&#125;&quot;, key: &quot;CFBundleShortVersionString&quot;)</span><br><span class="line">prev_build_version = get_info_plist_value(path: &quot;#&#123;ENV[&quot;PLISTPATH&quot;]&#125;&quot;, key: &quot;CFBundleVersion&quot;)</span><br><span class="line"></span><br><span class="line">apk_versions = prev_apk_version.split(pattern=&quot;.&quot;)</span><br><span class="line"></span><br><span class="line">step = 1</span><br><span class="line">if apk_versions[2].to_i == 0</span><br><span class="line">    step = 0</span><br><span class="line">elsif (apk_versions[2].to_i % 2) == 0</span><br><span class="line">    step = 2</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">current_apk_version = &quot;#&#123;apk_versions[0]&#125;.#&#123;apk_versions[1]&#125;.#&#123;apk_versions[2].to_i+step&#125;&quot;</span><br><span class="line">current_build_version = &quot;#&#123;prev_build_version.to_i + step&#125;&quot;</span><br><span class="line">next_apk_version = &quot;#&#123;apk_versions[0]&#125;.#&#123;apk_versions[1]&#125;.#&#123;apk_versions[2].to_i+step+1&#125;&quot;</span><br><span class="line">next_build_version = &quot;#&#123;prev_build_version.to_i + step + 1&#125;&quot;</span><br><span class="line"></span><br><span class="line">set_info_plist_value(path: &quot;#&#123;ENV[&quot;PLISTPATH&quot;]&#125;&quot;, key: &quot;CFBundleShortVersionString&quot;, value: current_apk_version)</span><br><span class="line">set_info_plist_value(path: &quot;#&#123;ENV[&quot;PLISTPATH&quot;]&#125;&quot;, key: &quot;CFBundleVersion&quot;, value: current_build_version)</span><br></pre></td></tr></table></figure>
+<h2 id="4-打包内购包"><a href="#4-打包内购包" class="headerlink" title="4. 打包内购包"></a>4. 打包内购包</h2><p>这个步骤也就是指定了打包目录和打包类型，没什么好说的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># output path</span><br><span class="line">output_name = &quot;#&#123;ENV[&quot;SCHEMA&quot;]&#125;_v#&#123;current_apk_version&#125;.ipa&quot;</span><br><span class="line">output_directory = &quot;~/Desktop/ad-hoc/#&#123;ENV[&quot;TAGNAME&quot;]&#125;/&quot;</span><br><span class="line">output_path = output_directory + output_name</span><br><span class="line"></span><br><span class="line"># gym build</span><br><span class="line">gym(</span><br><span class="line">    scheme: ENV[&quot;SCHEMA&quot;], </span><br><span class="line">    workspace: &quot;ksh3.xcworkspace&quot;, </span><br><span class="line">    include_bitcode: false,</span><br><span class="line">    export_method:&quot;ad-hoc&quot;,</span><br><span class="line">    output_name: output_name,</span><br><span class="line">    output_directory:output_directory)</span><br></pre></td></tr></table></figure>
+<h2 id="5-上传、推送消息"><a href="#5-上传、推送消息" class="headerlink" title="5. 上传、推送消息"></a>5. 上传、推送消息</h2><ul>
+<li>上传到 <code>fir.im</code> 并从消息中读取到 Release id，这样子可以拼接成指定版本的链接(之前我们都是手动去网站找的，累)</li>
+<li>如果没有这个功能的话，建议更新一下。或者直接用 <code>fir publish -s #{ENV[&quot;FIRLINK&quot;]} #{output_path}</code></li>
+<li>拼接一条消息推送到钉钉上，方便测试人员下载</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># fir cli &amp; grep Release id</span><br><span class="line">release_id = sh(&quot;fir publish -s #&#123;ENV[&quot;FIRLINK&quot;]&#125; #&#123;output_path&#125; | grep -i &apos;Release id is &apos; | grep -o -E &apos;[a-z0-9]&#123;16,&#125;&apos;&quot;)</span><br><span class="line"></span><br><span class="line"># dingtalk</span><br><span class="line">upload_msg = &quot; #&#123;ENV[&quot;APPNAME&quot;]&#125;v#&#123;current_apk_version&#125;&quot;</span><br><span class="line">upload_url = &quot;https://fir.im/#&#123;ENV[&quot;FIRLINK&quot;]&#125;?release_id=#&#123;release_id&#125;&quot;</span><br><span class="line">dingtalk(access_token:dingtoken, title:upload_msg, message:upload_msg, more_url: upload_url)</span><br></pre></td></tr></table></figure>
+<h2 id="6-收尾工作"><a href="#6-收尾工作" class="headerlink" title="6. 收尾工作"></a>6. 收尾工作</h2><ul>
+<li>重置一次当前的修改，保证当前环境的干净</li>
+<li>再拉取一次服务器代码。如果在打包时有同事提交了代码，就会导致提交时报错误</li>
+<li>打标签。这里要注意标签不能重复，否则会报错误</li>
+<li>再次修改版本号为开发版本号，也就是单数</li>
+<li>提交，推送，结束</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># update tags &amp; version</span><br><span class="line">sh &quot;git reset --hard&quot;</span><br><span class="line">sh &quot;git pull origin #&#123;branch_name&#125; --no-edit&quot;</span><br><span class="line"></span><br><span class="line">sh &quot;git tag #&#123;ENV[&apos;TAGNAME&apos;]&#125;_#&#123;current_apk_version&#125;&quot;</span><br><span class="line"></span><br><span class="line">set_info_plist_value(path: &quot;#&#123;ENV[&quot;PLISTPATH&quot;]&#125;&quot;, key: &quot;CFBundleShortVersionString&quot;, value: next_apk_version)</span><br><span class="line">set_info_plist_value(path: &quot;#&#123;ENV[&quot;PLISTPATH&quot;]&#125;&quot;, key: &quot;CFBundleVersion&quot;, value: next_build_version)</span><br><span class="line"></span><br><span class="line">sh &quot;git add .&quot;</span><br><span class="line">sh &quot;git commit -a -m &apos;update version&apos;&quot;</span><br><span class="line"></span><br><span class="line">sh &quot;git push origin #&#123;branch_name&#125; --tags&quot;</span><br><span class="line">sh &quot;git push origin #&#123;branch_name&#125;&quot;</span><br></pre></td></tr></table></figure>
+<h1 id="混淆分支"><a href="#混淆分支" class="headerlink" title="混淆分支"></a>混淆分支</h1><p>由于马甲包为了上架做了些混淆工作，所以会创建一个单独的 <code>分支名_appstore</code> 的分支作为混淆分支，这样会便于同步最新代码</p>
+<p>主要步骤:</p>
+<pre><code>1. 拉取非混淆分支最新代码
+2. 拼接分支名，切换到非混淆分支
+3. 合并非混淆分支代码到非混淆分支(这一步骤需要检查，可能有改动会造成冲突)
+4. 通过正常打包逻辑打混淆包
+5. 打包结束后，切换到正常分支
+6. 遴选到最后更新版本的那条记录到正常分支，然后推送到服务器
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">desc &quot;打混淆包专用&quot;</span><br><span class="line">lane :mix do</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># git branch</span><br><span class="line">branch_name = sh(&quot;git rev-parse --symbolic-full-name --abbrev-ref HEAD&quot;).gsub(/\s+/, &quot;&quot;)</span><br><span class="line"># 混淆后的分支名，默认为:分支名_appstore</span><br><span class="line">appstore_branch = &quot;#&#123;branch_name&#125;_appstore&quot;</span><br><span class="line"></span><br><span class="line"># 拉服务器最新代码</span><br><span class="line">sh &quot;git reset --hard&quot;</span><br><span class="line">sh &quot;git pull origin #&#123;branch_name&#125; --no-edit&quot;</span><br><span class="line"></span><br><span class="line"># 切换到混淆分支打包，之后切回来，遴选更新版本的变更到主分支</span><br><span class="line">sh &quot;git checkout #&#123;appstore_branch&#125;&quot;</span><br><span class="line">sh &quot;git pull origin #&#123;appstore_branch&#125;&quot;</span><br><span class="line">sh &quot;git merge #&#123;branch_name&#125;&quot;</span><br><span class="line">fir</span><br><span class="line">sh &quot;git checkout #&#123;branch_name&#125;&quot;</span><br><span class="line">sh &quot;git cherry-pick #&#123;appstore_branch&#125;&quot;</span><br><span class="line">sh &quot;git push origin #&#123;branch_name&#125;&quot;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><p>其实上边已经把我整个打包脚本代码贴出来了，其中也没有什么敏感信息。</p>
+<h2 id="环境变量文件"><a href="#环境变量文件" class="headerlink" title="环境变量文件"></a>环境变量文件</h2><blockquote>
+<p>文件保存到和 <code>Fastfile</code> 同级，名称应为 <code>.env.xxx</code>。命令记得带上 <code>fastlane fir --env xxx</code></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// .env.ksh3</span><br><span class="line">SCHEMA=&quot;&quot;                       # schema的名字</span><br><span class="line">PLISTPATH=&quot;&quot;                    # Info.plist 的位置，路径为相对于程序根目录</span><br><span class="line">FIRLINK=&quot;&quot;                      # fir.im 的短链，如 wcfg2018</span><br><span class="line">APPNAME=&quot;&quot;                      # APP名，中英文随意</span><br><span class="line">TAGNAME=&quot;&quot;                      # git标签名，叫什么随意，不过最好有点意义，可以用拼音或者英文名</span><br></pre></td></tr></table></figure>
+<h2 id="Fastfile"><a href="#Fastfile" class="headerlink" title="Fastfile"></a>Fastfile</h2><p>这里我按照上篇的考虑，选择了从远程获取，这样可以始终保持最新版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import_from_git(url: &apos;....git&apos;, path: &apos;Fastfile&apos;)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/fastlane/" rel="tag"># fastlane</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/18/fastlane-gym-01/" rel="next" title="基于fastlane的实践-自动化打包(上)">
+                <i class="fa fa-chevron-left"></i> 基于fastlane的实践-自动化打包(上)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/18/fastlane-match/" rel="prev" title="基于fastlane的实践-管理证书">
+                基于fastlane的实践-管理证书 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/13956214"
+                alt="汤~" />
+            
+              <p class="site-author-name" itemprop="name">汤~</p>
+              <p class="site-description motion-element" itemprop="description">有时候读书是一种巧妙地避开思考的方法</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/tangbl93/tangbl93.github.io/issues" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#需求"><span class="nav-number">1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#非混淆分支"><span class="nav-number">2.</span> <span class="nav-text">非混淆分支</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-解锁远程机器钥匙串"><span class="nav-number">2.1.</span> <span class="nav-text">1. 解锁远程机器钥匙串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-拉取最新代码，重置本地修改"><span class="nav-number">2.2.</span> <span class="nav-text">2. 拉取最新代码，重置本地修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-修改版本号"><span class="nav-number">2.3.</span> <span class="nav-text">3. 修改版本号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-打包内购包"><span class="nav-number">2.4.</span> <span class="nav-text">4. 打包内购包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-上传、推送消息"><span class="nav-number">2.5.</span> <span class="nav-text">5. 上传、推送消息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-收尾工作"><span class="nav-number">2.6.</span> <span class="nav-text">6. 收尾工作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#混淆分支"><span class="nav-number">3.</span> <span class="nav-text">混淆分支</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#完整代码"><span class="nav-number">4.</span> <span class="nav-text">完整代码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境变量文件"><span class="nav-number">4.1.</span> <span class="nav-text">环境变量文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fastfile"><span class="nav-number">4.2.</span> <span class="nav-text">Fastfile</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汤~</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'tangbl93',
+            repo: 'tangbl93.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '5c376910db69da0fb8fa10ae3168d5839a17010a',
+            
+                client_id: '0deae65a32e3aed5ee38'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

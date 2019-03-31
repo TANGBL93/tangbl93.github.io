@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="mask-icon" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本系列不属于入门文章，如果不懂如何安装或者使用的，可以去互联网搜索相关资料  从去年开始，有断断续续基于 fastlane 做一些工具，这个系列文章算是总结输出一下这段经验。本篇属于大纲。 大纲 基于fastlane的实践-自动化打包(上) 基于fastlane的实践-自动化打包(下) 基于fastlane的实践-管理证书 基于fastlane的实践-添加测试机 基于fastlane的实践-新建">
+<meta name="keywords" content="fastlane">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于fastlane的实践-大纲">
+<meta property="og:url" content="https://tangbl93.github.io/2018/08/18/fastlane-overview/index.html">
+<meta property="og:site_name" content="汤~">
+<meta property="og:description" content="本系列不属于入门文章，如果不懂如何安装或者使用的，可以去互联网搜索相关资料  从去年开始，有断断续续基于 fastlane 做一些工具，这个系列文章算是总结输出一下这段经验。本篇属于大纲。 大纲 基于fastlane的实践-自动化打包(上) 基于fastlane的实践-自动化打包(下) 基于fastlane的实践-管理证书 基于fastlane的实践-添加测试机 基于fastlane的实践-新建">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-31T00:42:55.155Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于fastlane的实践-大纲">
+<meta name="twitter:description" content="本系列不属于入门文章，如果不懂如何安装或者使用的，可以去互联网搜索相关资料  从去年开始，有断断续续基于 fastlane 做一些工具，这个系列文章算是总结输出一下这段经验。本篇属于大纲。 大纲 基于fastlane的实践-自动化打包(上) 基于fastlane的实践-自动化打包(下) 基于fastlane的实践-管理证书 基于fastlane的实践-添加测试机 基于fastlane的实践-新建">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="汤~" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://tangbl93.github.io/2018/08/18/fastlane-overview/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>基于fastlane的实践-大纲 | 汤~</title>
+  
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=96340554-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '96340554-1');
+</script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">汤~</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangbl93.github.io/2018/08/18/fastlane-overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="汤~">
+      <meta itemprop="description" content="有时候读书是一种巧妙地避开思考的方法">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/13956214">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="汤~">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于fastlane的实践-大纲
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-18 08:23:42" itemprop="dateCreated datePublished" datetime="2018-08-18T08:23:42+00:00">2018-08-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-31 00:42:55" itemprop="dateModified" datetime="2019-03-31T00:42:55+00:00">2019-03-31</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/18/fastlane-overview/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/08/18/fastlane-overview/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>本系列不属于入门文章，如果不懂如何安装或者使用的，可以去互联网搜索相关资料</p>
+</blockquote>
+<p>从去年开始，有断断续续基于 <code>fastlane</code> 做一些工具，这个系列文章算是总结输出一下这段经验。本篇属于大纲。</p>
+<h2 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h2><ul>
+<li><a href="../fastlane-gym-01/">基于fastlane的实践-自动化打包(上)</a></li>
+<li><a href="../fastlane-gym-02/">基于fastlane的实践-自动化打包(下)</a></li>
+<li><a href="../fastlane-match/">基于fastlane的实践-管理证书</a></li>
+<li><a href="../fastlane-tjcsj/">基于fastlane的实践-添加测试机</a></li>
+<li><a href="../fastlane-iap/">基于fastlane的实践-新建内购项目</a></li>
+<li><a href="/2018/12/02/fastlane-archive/">基于fastlane的实践-通过Archive生成IPA</a></li>
+</ul>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>去年入职现在这家公司，每天都会打两次内测包。就去尝试做一些东西来减轻一些人力负担。最后找到一台 <code>mac mini</code> 来做打包。</p>
+<p>再之后，因为有了多个新的马甲包，所以又尝试研究了下 <code>管理证书</code>、<code>新建内购项目</code> 这几个东西。</p>
+<p>同样，也是由于马甲包的问题，有其他部门或者测试机都需要添加UDID，手动完成这个步骤非常费时间，就同样研究了下。</p>
+<h2 id="成果"><a href="#成果" class="headerlink" title="成果"></a>成果</h2><p>最终的成果还算让我满意。效果如下:</p>
+<ul>
+<li>自动化打包(AdHoc): <ul>
+<li>支持远程登录主机打包</li>
+<li>支持自动增加、识别版本号，并按序增加</li>
+<li>(Git)支持自动拉取，打标签，推送</li>
+<li>支持打混淆马甲包，并合并修改到非混淆代码分支</li>
+<li>支持推送到 <code>fir.im</code>、发送钉钉消息</li>
+<li>支持一份文件+配置文件打不同马甲包</li>
+</ul>
+</li>
+<li>管理证书: 失败，效果不算好</li>
+<li>添加新测试机: 成功</li>
+<li>新建内购项目: 成功</li>
+</ul>
+<h2 id="期望做的"><a href="#期望做的" class="headerlink" title="期望做的"></a>期望做的</h2><h3 id="基于-AdHoc-打包的文件，自动生成-AppStore-的-ipa"><a href="#基于-AdHoc-打包的文件，自动生成-AppStore-的-ipa" class="headerlink" title="基于 AdHoc 打包的文件，自动生成 AppStore 的 ipa"></a><del>基于 <code>AdHoc</code> 打包的文件，自动生成 <code>AppStore</code> 的 <code>ipa</code></del></h3><blockquote>
+<p>已实现:<a href="/2018/12/02/fastlane-archive/">基于fastlane的实践-通过Archive生成IPA</a></p>
+</blockquote>
+<p>这一步其实是由于现在上传 <code>App Store</code> 就是基于 <code>Xcode</code> 来做的，可以省去重复打包，而且确保代码和测试过的一致。</p>
+<p><code>Xcode</code> 的入口在 <code>Window</code> -&gt; <code>Organzier</code> -&gt; <code>Archives</code> , 然后找到对应的版本，提交或者生成包就行了。</p>
+<p>我就在考虑有没有好办法，可以获取到这个路径，然后自动转换成 <code>App Store</code> 的包然后上传提交。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/fastlane/" rel="tag"># fastlane</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/22/AFNetworkActivityLogger/" rel="next" title="AFNetworkActivityLogger 源码解读">
+                <i class="fa fa-chevron-left"></i> AFNetworkActivityLogger 源码解读
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/18/fastlane-gym-01/" rel="prev" title="基于fastlane的实践-自动化打包(上)">
+                基于fastlane的实践-自动化打包(上) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/13956214"
+                alt="汤~" />
+            
+              <p class="site-author-name" itemprop="name">汤~</p>
+              <p class="site-description motion-element" itemprop="description">有时候读书是一种巧妙地避开思考的方法</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/tangbl93/tangbl93.github.io/issues" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#大纲"><span class="nav-number">1.</span> <span class="nav-text">大纲</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#成果"><span class="nav-number">3.</span> <span class="nav-text">成果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#期望做的"><span class="nav-number">4.</span> <span class="nav-text">期望做的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于-AdHoc-打包的文件，自动生成-AppStore-的-ipa"><span class="nav-number">4.1.</span> <span class="nav-text">基于 AdHoc 打包的文件，自动生成 AppStore 的 ipa</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汤~</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'tangbl93',
+            repo: 'tangbl93.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '5c376910db69da0fb8fa10ae3168d5839a17010a',
+            
+                client_id: '0deae65a32e3aed5ee38'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

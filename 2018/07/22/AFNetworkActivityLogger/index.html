@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0">
+
+
+  <link rel="mask-icon" href="https://avatars3.githubusercontent.com/u/13956214?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="介绍 AFNetworkActivityLogger -&amp;gt; 依赖于 AFNetworking 的官方日志组件  作用通过了解这个源码，可以方便定制网络请求日志监控模块。 原理这个日志组件本身的实现原理是通过 AFNetworking 的通知来实现的。 类文件总览将源码下载下来，打开发现一共就三个类/接口：  AFNetworkActivityLogger         管理类 AFNetw">
+<meta name="keywords" content="AFNetworking,Logger,源码解读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AFNetworkActivityLogger 源码解读">
+<meta property="og:url" content="https://tangbl93.github.io/2018/07/22/AFNetworkActivityLogger/index.html">
+<meta property="og:site_name" content="汤~">
+<meta property="og:description" content="介绍 AFNetworkActivityLogger -&amp;gt; 依赖于 AFNetworking 的官方日志组件  作用通过了解这个源码，可以方便定制网络请求日志监控模块。 原理这个日志组件本身的实现原理是通过 AFNetworking 的通知来实现的。 类文件总览将源码下载下来，打开发现一共就三个类/接口：  AFNetworkActivityLogger         管理类 AFNetw">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-31T00:42:55.155Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AFNetworkActivityLogger 源码解读">
+<meta name="twitter:description" content="介绍 AFNetworkActivityLogger -&amp;gt; 依赖于 AFNetworking 的官方日志组件  作用通过了解这个源码，可以方便定制网络请求日志监控模块。 原理这个日志组件本身的实现原理是通过 AFNetworking 的通知来实现的。 类文件总览将源码下载下来，打开发现一共就三个类/接口：  AFNetworkActivityLogger         管理类 AFNetw">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="汤~" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://tangbl93.github.io/2018/07/22/AFNetworkActivityLogger/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>AFNetworkActivityLogger 源码解读 | 汤~</title>
+  
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=96340554-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '96340554-1');
+</script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">汤~</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangbl93.github.io/2018/07/22/AFNetworkActivityLogger/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="汤~">
+      <meta itemprop="description" content="有时候读书是一种巧妙地避开思考的方法">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/13956214">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="汤~">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AFNetworkActivityLogger 源码解读
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-22 13:17:23" itemprop="dateCreated datePublished" datetime="2018-07-22T13:17:23+00:00">2018-07-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-31 00:42:55" itemprop="dateModified" datetime="2019-03-31T00:42:55+00:00">2019-03-31</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/22/AFNetworkActivityLogger/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/22/AFNetworkActivityLogger/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><blockquote>
+<p>AFNetworkActivityLogger -&gt; 依赖于 <code>AFNetworking</code> 的官方日志组件</p>
+</blockquote>
+<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><p>通过了解这个源码，可以方便定制网络请求日志监控模块。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>这个日志组件本身的实现原理是通过 <code>AFNetworking</code> 的通知来实现的。</p>
+<h2 id="类文件总览"><a href="#类文件总览" class="headerlink" title="类文件总览"></a>类文件总览</h2><p>将源码下载下来，打开发现一共就三个类/接口：</p>
+<ul>
+<li><code>AFNetworkActivityLogger</code>         管理类</li>
+<li><code>AFNetworkActivityConsoleLogger</code>  内置的控制台日志实现</li>
+<li><code>AFNetworkActivityLoggerProtocol</code> 日志接口/代理</li>
+</ul>
+<h1 id="源代码"><a href="#源代码" class="headerlink" title="源代码"></a>源代码</h1><h2 id="上手使用"><a href="#上手使用" class="headerlink" title="上手使用"></a>上手使用</h2><p>按照 <code>README</code> 上说的，仅需要在启动时加上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[[AFNetworkActivityLogger sharedLogger] startLogging];</span><br></pre></td></tr></table></figure>
+<h2 id="AFNetworkActivityLogger-类"><a href="#AFNetworkActivityLogger-类" class="headerlink" title="AFNetworkActivityLogger 类"></a><code>AFNetworkActivityLogger</code> 类</h2><p>基本上，作为一个普通使用者而言，这个类一般是整个组件中唯一需要接触到的。</p>
+<h3 id="loggers"><a href="#loggers" class="headerlink" title="loggers"></a>loggers</h3><ul>
+<li>对外暴露出当前组件中注册过的日志记录器(logger)</li>
+<li>内部维护一个单独的可变集合对象，用于做增删操作</li>
+</ul>
+<h3 id="sharedLogger-init"><a href="#sharedLogger-init" class="headerlink" title="sharedLogger / init"></a>sharedLogger / init</h3><p>在初始化时：</p>
+<ul>
+<li>初始化一个可变集合对象，用于保存注册过的日志记录器</li>
+<li>会初始化一个 <code>AFNetworkActivityConsoleLogger</code> 日志记录器，并通过 <code>addLogger:</code> 方法注册到组件中</li>
+</ul>
+<h3 id="startLogging-stopLogging"><a href="#startLogging-stopLogging" class="headerlink" title="startLogging / stopLogging"></a>startLogging / stopLogging</h3><p>在 <code>startLogging</code> 时，监听 <code>AFNetworkingTaskDidResumeNotification</code> 、 <code>AFNetworkingTaskDidCompleteNotification</code> 通知事件，并分别绑定到 <code>networkRequestDidStart:</code> 以及 <code>networkRequestDidFinish:</code> 方法上</p>
+<p>在 <code>stopLogging</code> 时，取消监听事件，此外，在 <code>dealloc</code> 方法也会调用该方法</p>
+<h3 id="setLogLevel"><a href="#setLogLevel" class="headerlink" title="setLogLevel:"></a>setLogLevel:</h3><p>遍历组件中注册过的日志记录器，将其 <code>level</code> 修改成指定值</p>
+<h3 id="addLogger-removeLogger"><a href="#addLogger-removeLogger" class="headerlink" title="addLogger: / removeLogger:"></a>addLogger: / removeLogger:</h3><p>在 <code>loggers</code> 中添加 / 移除传入的日志记录器</p>
+<h3 id="networkRequestDidStart"><a href="#networkRequestDidStart" class="headerlink" title="networkRequestDidStart:"></a>networkRequestDidStart:</h3><p>在记录请求开始的方法中，主要有以下几个步骤:</p>
+<ol>
+<li>从通知对象中取出 <code>task</code>、<code>request</code></li>
+<li>检测 <code>request</code> 是否存在，不存在就退出，存在就继续执行</li>
+<li>将当前时间保存到 <code>task</code> 上，用于在请求结束时计算耗时时间</li>
+<li>遍历已注册的日志记录器</li>
+<li>检测当前遍历到的日志记录器是否支持过滤，如支持且符合过滤条件，则中断执行</li>
+<li>调用日志记录器的 <code>URLSessionTaskDidStart:</code> 方法，记录请求开始事件</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">static void * AFNetworkRequestStartDate = &amp;AFNetworkRequestStartDate;</span><br><span class="line"></span><br><span class="line">- (void)networkRequestDidStart:(NSNotification *)notification &#123;</span><br><span class="line">    // #1</span><br><span class="line">    NSURLSessionTask *task = [notification object];</span><br><span class="line">    NSURLRequest *request = task.originalRequest;</span><br><span class="line"></span><br><span class="line">    // #2</span><br><span class="line">    if (!request) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // #3</span><br><span class="line">    objc_setAssociatedObject(notification.object, AFNetworkRequestStartDate, [NSDate date], OBJC_ASSOCIATION_RETAIN_NONATOMIC);</span><br><span class="line"></span><br><span class="line">    // #4</span><br><span class="line">    for (id &lt;AFNetworkActivityLoggerProtocol&gt; logger in self.loggers) &#123;</span><br><span class="line"></span><br><span class="line">        // #5</span><br><span class="line">        if (request &amp;&amp; logger.filterPredicate &amp;&amp; [logger.filterPredicate evaluateWithObject:request]) &#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        // #6</span><br><span class="line">        [logger URLSessionTaskDidStart:task];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="networkRequestDidFinish"><a href="#networkRequestDidFinish" class="headerlink" title="networkRequestDidFinish:"></a>networkRequestDidFinish:</h3><p>在记录请求结束的方法中，主要有以下几个步骤:</p>
+<ol>
+<li>从通知对象中取出 <code>task</code>、<code>request</code> 、<code>response</code> , 以及尝试获取 <code>error</code></li>
+<li>如果 <code>request</code> 、<code>response</code> 均为空，则中断执行</li>
+<li>从通知对象的 <code>userInfo</code> 取出服务器返回的数据</li>
+<li>从 <code>task</code> 中取出请求开始时保存的时间，并计算出请求耗时</li>
+<li>遍历，同上</li>
+<li>检查过滤，同上</li>
+<li>调用日志记录器的 <code>URLSessionTaskDidFinish:withResponseObject:inElapsedTime:withError:</code> 方法，记录请求结束事件</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)networkRequestDidFinish:(NSNotification *)notification &#123;</span><br><span class="line">    <span class="comment">// #1</span></span><br><span class="line">    NSURLSessionTask *task = [notification object];</span><br><span class="line">    NSURLRequest *request = task.originalRequest;</span><br><span class="line">    NSURLResponse *response = task.response;</span><br><span class="line">    NSError *error = AFNetworkErrorFromNotification(notification);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// #2</span></span><br><span class="line">    <span class="keyword">if</span> (!request &amp;&amp; !response) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// #3</span></span><br><span class="line">    id responseObject = nil;</span><br><span class="line">    <span class="keyword">if</span> (notification.userInfo) &#123;</span><br><span class="line">        responseObject = notification.userInfo[AFNetworkingTaskDidCompleteSerializedResponseKey];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// #4</span></span><br><span class="line">    NSTimeInterval elapsedTime = [[NSDate date] timeIntervalSinceDate:objc_getAssociatedObject(notification.object, AFNetworkRequestStartDate)];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// #5</span></span><br><span class="line">    <span class="keyword">for</span> (id &lt;AFNetworkActivityLoggerProtocol&gt; logger in self.loggers) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// #6</span></span><br><span class="line">        <span class="keyword">if</span> (request &amp;&amp; logger.filterPredicate &amp;&amp; [logger.filterPredicate evaluateWithObject:request]) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// #7</span></span><br><span class="line">        [logger URLSessionTaskDidFinish:task withResponseObject:responseObject inElapsedTime:elapsedTime withError:error];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="AFNetworkActivityLoggerProtocol-代理"><a href="#AFNetworkActivityLoggerProtocol-代理" class="headerlink" title="AFNetworkActivityLoggerProtocol 代理"></a><code>AFNetworkActivityLoggerProtocol</code> 代理</h2><h3 id="日志级别-AFHTTPRequestLoggerLevel"><a href="#日志级别-AFHTTPRequestLoggerLevel" class="headerlink" title="日志级别 AFHTTPRequestLoggerLevel"></a>日志级别 AFHTTPRequestLoggerLevel</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typedef NS_ENUM(NSUInteger, AFHTTPRequestLoggerLevel) &#123;</span><br><span class="line">    AFLoggerLevelOff,</span><br><span class="line">    AFLoggerLevelDebug,</span><br><span class="line">    AFLoggerLevelInfo,</span><br><span class="line">    AFLoggerLevelError</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="filterPredicate-、-level"><a href="#filterPredicate-、-level" class="headerlink" title="filterPredicate 、 level"></a>filterPredicate 、 level</h3><p>通过断言或者日志级别来过滤某些日志信息</p>
+<h3 id="日志记录器方法"><a href="#日志记录器方法" class="headerlink" title="日志记录器方法"></a>日志记录器方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/// 记录请求开始</span><br><span class="line">- (void)URLSessionTaskDidStart:(NSURLSessionTask *)task;</span><br><span class="line">/// 记录请求结束</span><br><span class="line">- (void)URLSessionTaskDidFinish:(NSURLSessionTask *)task withResponseObject:(id)responseObject inElapsedTime:(NSTimeInterval)elapsedTime withError:(NSError *)error;</span><br></pre></td></tr></table></figure>
+<h2 id="AFNetworkActivityConsoleLogger-控制台日志记录器"><a href="#AFNetworkActivityConsoleLogger-控制台日志记录器" class="headerlink" title="AFNetworkActivityConsoleLogger 控制台日志记录器"></a><code>AFNetworkActivityConsoleLogger</code> 控制台日志记录器</h2><p>这个类作为内置的日志记录器，大致实现了应有的功能，可以从中学习如何定制日志记录器</p>
+<h3 id="level"><a href="#level" class="headerlink" title="level"></a>level</h3><p>在初始化方法中，设置为 <code>AFLoggerLevelInfo</code></p>
+<h3 id="filterPredicate"><a href="#filterPredicate" class="headerlink" title="filterPredicate"></a>filterPredicate</h3><p>未实现过滤器</p>
+<h3 id="URLSessionTaskDidStart"><a href="#URLSessionTaskDidStart" class="headerlink" title="URLSessionTaskDidStart:"></a>URLSessionTaskDidStart:</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- (void)URLSessionTaskDidStart:(NSURLSessionTask *)task &#123;</span><br><span class="line">    NSURLRequest *request = task.originalRequest;</span><br><span class="line"></span><br><span class="line">    NSString *body = nil;</span><br><span class="line">    if ([request HTTPBody]) &#123;</span><br><span class="line">        body = [[NSString alloc] initWithData:[request HTTPBody] encoding:NSUTF8StringEncoding];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    switch (self.level) &#123;</span><br><span class="line">        case AFLoggerLevelDebug:</span><br><span class="line">            NSLog(@&quot;%@ &apos;%@&apos;: %@ %@&quot;, [request HTTPMethod], [[request URL] absoluteString], [request allHTTPHeaderFields], body);</span><br><span class="line">            break;</span><br><span class="line">        case AFLoggerLevelInfo:</span><br><span class="line">            NSLog(@&quot;%@ &apos;%@&apos;&quot;, [request HTTPMethod], [[request URL] absoluteString]);</span><br><span class="line">            break;</span><br><span class="line">        default:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="URLSessionTaskDidFinish-withResponseObject-inElapsedTime-withError"><a href="#URLSessionTaskDidFinish-withResponseObject-inElapsedTime-withError" class="headerlink" title="URLSessionTaskDidFinish:withResponseObject:inElapsedTime:withError:"></a>URLSessionTaskDidFinish:withResponseObject:inElapsedTime:withError:</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">- (void)URLSessionTaskDidFinish:(NSURLSessionTask *)task withResponseObject:(id)responseObject inElapsedTime:(NSTimeInterval )elapsedTime withError:(NSError *)error &#123;</span><br><span class="line">    NSUInteger responseStatusCode = 0;</span><br><span class="line">    NSDictionary *responseHeaderFields = nil;</span><br><span class="line">    if ([task.response isKindOfClass:[NSHTTPURLResponse class]]) &#123;</span><br><span class="line">        responseStatusCode = (NSUInteger)[(NSHTTPURLResponse *)task.response statusCode];</span><br><span class="line">        responseHeaderFields = [(NSHTTPURLResponse *)task.response allHeaderFields];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (error) &#123;</span><br><span class="line">        switch (self.level) &#123;</span><br><span class="line">            case AFLoggerLevelDebug:</span><br><span class="line">            case AFLoggerLevelInfo:</span><br><span class="line">            case AFLoggerLevelError:</span><br><span class="line">                NSLog(@&quot;[Error] %@ &apos;%@&apos; (%ld) [%.04f s]: %@&quot;, [task.originalRequest HTTPMethod], [[task.response URL] absoluteString], (long)responseStatusCode, elapsedTime, error);</span><br><span class="line">            default:</span><br><span class="line">                break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        switch (self.level) &#123;</span><br><span class="line">            case AFLoggerLevelDebug:</span><br><span class="line">                NSLog(@&quot;%ld &apos;%@&apos; [%.04f s]: %@ %@&quot;, (long)responseStatusCode, [[task.response URL] absoluteString], elapsedTime, responseHeaderFields, responseObject);</span><br><span class="line">                break;</span><br><span class="line">            case AFLoggerLevelInfo:</span><br><span class="line">                NSLog(@&quot;%ld &apos;%@&apos; [%.04f s]&quot;, (long)responseStatusCode, [[task.response URL] absoluteString], elapsedTime);</span><br><span class="line">                break;</span><br><span class="line">            default:</span><br><span class="line">                break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/AFNetworking/" rel="tag"># AFNetworking</a>
+          
+            <a href="/tags/Logger/" rel="tag"># Logger</a>
+          
+            <a href="/tags/源码解读/" rel="tag"># 源码解读</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/17/fix-LOG-OBJC-MAYBE-Invalid/" rel="next" title="Implicit declaration of function 'LOG_OBJC_MAYBE' is invalid in C99">
+                <i class="fa fa-chevron-left"></i> Implicit declaration of function 'LOG_OBJC_MAYBE' is invalid in C99
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/18/fastlane-overview/" rel="prev" title="基于fastlane的实践-大纲">
+                基于fastlane的实践-大纲 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/13956214"
+                alt="汤~" />
+            
+              <p class="site-author-name" itemprop="name">汤~</p>
+              <p class="site-description motion-element" itemprop="description">有时候读书是一种巧妙地避开思考的方法</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/tangbl93/tangbl93.github.io/issues" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#介绍"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#作用"><span class="nav-number">1.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">1.2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类文件总览"><span class="nav-number">1.3.</span> <span class="nav-text">类文件总览</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源代码"><span class="nav-number">2.</span> <span class="nav-text">源代码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#上手使用"><span class="nav-number">2.1.</span> <span class="nav-text">上手使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AFNetworkActivityLogger-类"><span class="nav-number">2.2.</span> <span class="nav-text">AFNetworkActivityLogger 类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#loggers"><span class="nav-number">2.2.1.</span> <span class="nav-text">loggers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sharedLogger-init"><span class="nav-number">2.2.2.</span> <span class="nav-text">sharedLogger / init</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#startLogging-stopLogging"><span class="nav-number">2.2.3.</span> <span class="nav-text">startLogging / stopLogging</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setLogLevel"><span class="nav-number">2.2.4.</span> <span class="nav-text">setLogLevel:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addLogger-removeLogger"><span class="nav-number">2.2.5.</span> <span class="nav-text">addLogger: / removeLogger:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#networkRequestDidStart"><span class="nav-number">2.2.6.</span> <span class="nav-text">networkRequestDidStart:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#networkRequestDidFinish"><span class="nav-number">2.2.7.</span> <span class="nav-text">networkRequestDidFinish:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AFNetworkActivityLoggerProtocol-代理"><span class="nav-number">2.3.</span> <span class="nav-text">AFNetworkActivityLoggerProtocol 代理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#日志级别-AFHTTPRequestLoggerLevel"><span class="nav-number">2.3.1.</span> <span class="nav-text">日志级别 AFHTTPRequestLoggerLevel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filterPredicate-、-level"><span class="nav-number">2.3.2.</span> <span class="nav-text">filterPredicate 、 level</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志记录器方法"><span class="nav-number">2.3.3.</span> <span class="nav-text">日志记录器方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AFNetworkActivityConsoleLogger-控制台日志记录器"><span class="nav-number">2.4.</span> <span class="nav-text">AFNetworkActivityConsoleLogger 控制台日志记录器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#level"><span class="nav-number">2.4.1.</span> <span class="nav-text">level</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filterPredicate"><span class="nav-number">2.4.2.</span> <span class="nav-text">filterPredicate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URLSessionTaskDidStart"><span class="nav-number">2.4.3.</span> <span class="nav-text">URLSessionTaskDidStart:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URLSessionTaskDidFinish-withResponseObject-inElapsedTime-withError"><span class="nav-number">2.4.4.</span> <span class="nav-text">URLSessionTaskDidFinish:withResponseObject:inElapsedTime:withError:</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汤~</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'tangbl93',
+            repo: 'tangbl93.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '5c376910db69da0fb8fa10ae3168d5839a17010a',
+            
+                client_id: '0deae65a32e3aed5ee38'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
